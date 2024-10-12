@@ -5,18 +5,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 public class AuthInfo implements Authentication {
 
-  // current user info for Spring Security Context
-  //fields
   private boolean authenticated;
   private String username;
   private Set<Role> roles;
 
-  // constructor
   public AuthInfo(String username, Set<Role> roles) {
     this.username = username;
     this.roles = roles;
@@ -27,13 +23,11 @@ public class AuthInfo implements Authentication {
     return roles;
   }
 
-  // not using
   @Override
   public Object getCredentials() {
     return null;
   }
 
-  // not using
   @Override
   public Object getDetails() {
     return null;
@@ -51,7 +45,7 @@ public class AuthInfo implements Authentication {
 
   @Override
   public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-    this.authenticated = authenticated;
+    this.authenticated = isAuthenticated;
   }
 
   @Override

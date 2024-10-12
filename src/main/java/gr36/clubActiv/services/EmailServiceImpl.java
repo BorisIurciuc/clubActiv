@@ -18,55 +18,60 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-  //fields
   private final JavaMailSender sender;
   private final Configuration mailConfig;
   private final ConfirmationService confirmationService;
 
-  //constructor
-
-  public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig,
-      ConfirmationService confirmationService) {
+  // Constructor injection
+  public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig, ConfirmationService confirmationService) {
     this.sender = sender;
     this.mailConfig = mailConfig;
     this.confirmationService = confirmationService;
 
+    // Set mail configuration
     mailConfig.setDefaultEncoding("UTF-8");
     mailConfig.setTemplateLoader(new ClassTemplateLoader(EmailServiceImpl.class, "/mail"));
   }
 
   @Override
   public void sendConfirmationEmail(User user) {
-
-    MimeMessage message = sender.createMimeMessage(); // create object MimiMessage
-    MimeMessageHelper helper= new MimeMessageHelper(message, "UTF-8");
-    String emailText = generateEmailText(user);
+    MimeMessage message = sender.createMimeMessage(); // Create MimeMessage object
     try {
-      helper.setFrom("boris.iurciuc@gmail.com"); // ящик
-      helper.setTo(user.getEmail()); // адресат
-      helper.setSubject("Registration"); // тема
-      helper.setText(emailText, true); // содержание и формат
+      MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+      // Generate the email content using the FreeMarker template
+      String emailText = generateEmailText(user);
+
+      // Set email metadata
+      helper.setFrom("nejelschi@gmail.com");
+      helper.setTo(user.getEmail());
+      helper.setSubject("Registration Confirmation");
+      helper.setText(emailText, true); // Set true for HTML content
+
+      // Send email
       sender.send(message);
     } catch (MessagingException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error while sending confirmation email", e);
     }
   }
 
   private String generateEmailText(User user) {
-    Template template = null;
     try {
-      template = mailConfig.getTemplate("confirm_reg_mail.ftlh");
+      Template template = mailConfig.getTemplate("confirm_reg_mail.ftlh");
+
+      // Generate confirmation code and URL
       String code = confirmationService.generateConfirmationCode(user);
-      String url = "http://localhost:8080/register?code=" + code;
-      // Для добавления данных в шаблон создаём мап:
-      // name -> Vasya
-      // link -> localhost:8080/register?code=87fdsf6sf-fsffsd-f87sdf
-      Map<String, Object> templateMap = new HashMap<>();
-      templateMap.put("name", user.getName());
-      templateMap.put("link", url);
-      return FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMap);
+      String url = "http://localhost:8080/api/register?code=" + code;
+
+      // Prepare template data
+      Map<String, Object> templateData = new HashMap<>();
+      templateData.put("name", user.getName());
+      templateData.put("link", url);
+
+      // Process template into a String
+      return FreeMarkerTemplateUtils.processTemplateIntoString(template, templateData);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error while generating email text", e);
     }
   }
 }

@@ -1,21 +1,11 @@
 package gr36.clubActiv.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "activities")
@@ -49,11 +39,18 @@ public class Activity {
   )
   @JsonIgnore
   private List<User> users;
-
   public void addUser(User user) {
-    users.add(user);
+    if (!users.contains(user)) {
+      users.add(user);
+    }
   }
 
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "author_id")
+  private User author;
+
+  // Getters and Setters
   public Long getId() {
     return id;
   }
@@ -94,14 +91,6 @@ public class Activity {
     this.image = image;
   }
 
-  public List<User> getUsers() {
-    return users;
-  }
-
-  public void setUsers(List<User> users) {
-    this.users = users;
-  }
-
   public String getDescription() {
     return description;
   }
@@ -110,6 +99,22 @@ public class Activity {
     this.description = description;
   }
 
+  public List<User> getUsers() {
+    return users;
+  }
+
+  public void setUsers(List<User> users) {
+    this.users = users;
+  }
+
+  // New Getter and Setter for Author
+  public User getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(User author) {
+    this.author = author;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -119,23 +124,22 @@ public class Activity {
     if (!(o instanceof Activity activity)) {
       return false;
     }
-    return Objects.equals(getId(), activity.getId()) && Objects.equals(getTitle(),
-        activity.getTitle()) && Objects.equals(getAddress(), activity.getAddress())
-        && Objects.equals(getStartDate(), activity.getStartDate())
-        && Objects.equals(getImage(), activity.getImage()) && Objects.equals(
-        getDescription(), activity.getDescription());
+    return Objects.equals(getId(), activity.getId()) &&
+        Objects.equals(getTitle(), activity.getTitle()) &&
+        Objects.equals(getAddress(), activity.getAddress()) &&
+        Objects.equals(getStartDate(), activity.getStartDate()) &&
+        Objects.equals(getImage(), activity.getImage()) &&
+        Objects.equals(getDescription(), activity.getDescription());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getTitle(), getAddress(), getStartDate(), getImage(),
-        getDescription());
+    return Objects.hash(getId(), getTitle(), getAddress(), getStartDate(), getImage(), getDescription());
   }
 
   @Override
   public String toString() {
-    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s,"
-            + "description - %s",
-        id, title, address, startDate, image, description);
+    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s, description - %s, author - %s",
+        id, title, address, startDate, image, description, author.getUsername());
   }
 }

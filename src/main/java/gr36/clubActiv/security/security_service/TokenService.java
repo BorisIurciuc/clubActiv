@@ -20,16 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-
-@Service  // Аннотация, указывающая, что этот класс является сервисом в Spring, который можно инжектировать
+@Service
 public class TokenService {
-  //fields
-  private SecretKey accessKey;
-  private SecretKey refreshKey;
-  private RoleRepository roleRepository;
 
-  // constructor, в который мы передадим секретные фразы
-  // https://www.devglan.com/online-tools/hmac-sha256-online - для генерации секретных фраз
+  private final SecretKey accessKey;
+  private final SecretKey refreshKey;
+  private final RoleRepository roleRepository;
+
+  // Constructor with secret keys injected from application properties
   public TokenService(
       @Value("${key.access}") String accessSecretPhrase,
       @Value("${key.refresh}") String refreshSecretPhrase,
@@ -40,93 +38,92 @@ public class TokenService {
     this.roleRepository = roleRepository;
   }
 
+  // Generate access token
   public String generateAccessToken(UserDetails user) {
-    LocalDateTime currentDate = LocalDateTime.now(); // дата сегодня
-    Instant expirationInstant = currentDate.plusDays(27).atZone(ZoneId.systemDefault()).toInstant(); // дата в будущем на плюс 7 дней от сейчас
-    Date expiration = Date.from(expirationInstant); // дата истечения годности токена
-    // строим токен
-    return Jwts.builder()
-        .subject(user.getUsername()) // кладем в токен "предмет" токена
-        .expiration(expiration) // кладем дату
-        .signWith(accessKey) // кладем ключ
-        .claim("roles", user.getAuthorities()) // кладем роли юзера
-        .claim("name", user.getUsername()) //
-        .compact();
-  }
-
-  public String generateRefreshToken(UserDetails user) {
     LocalDateTime currentDate = LocalDateTime.now();
-    Instant expirationInstant = currentDate.plusDays(30).atZone(ZoneId.systemDefault()).toInstant();
+    Instant expirationInstant = currentDate.plusDays(7).atZone(ZoneId.systemDefault()).toInstant(); // Expires in 7 days
     Date expiration = Date.from(expirationInstant);
 
     return Jwts.builder()
-        .subject(user.getUsername())
-        .expiration(expiration)
+        .setSubject(user.getUsername())
+        .setExpiration(expiration)
+        .signWith(accessKey)
+        .claim("roles", user.getAuthorities())  // Store roles
+        .claim("name", user.getUsername())      // Store username
+        .compact();
+  }
+
+  // Generate refresh token
+  public String generateRefreshToken(UserDetails user) {
+    LocalDateTime currentDate = LocalDateTime.now();
+    Instant expirationInstant = currentDate.plusDays(30).atZone(ZoneId.systemDefault()).toInstant(); // Expires in 30 days
+    Date expiration = Date.from(expirationInstant);
+
+    return Jwts.builder()
+        .setSubject(user.getUsername())
+        .setExpiration(expiration)
         .signWith(refreshKey)
         .compact();
   }
 
-  // tokens validation
+  // Validate access token
   public boolean validateAccessToken(String accessToken) {
     return validateToken(accessToken, accessKey);
   }
 
+  // Validate refresh token
   public boolean validateRefreshToken(String refreshToken) {
     return validateToken(refreshToken, refreshKey);
   }
 
   private boolean validateToken(String token, SecretKey key) {
     try {
-      Jwts.parser()
-          .verifyWith(key)
+      Jwts.parserBuilder()
+          .setSigningKey(key)
           .build()
-          .parseSignedClaims(token);
+          .parseClaimsJws(token);
       return true;
     } catch (Exception e) {
-      return false; // токен не валиден
+      return false; // Token is invalid
     }
   }
 
-  // методы для извлечения данных из токенов
+  // Get access token claims
   public Claims getAccessClaims(String accessToken) {
     return getClaims(accessToken, accessKey);
   }
 
+  // Get refresh token claims
   public Claims getRefreshClaims(String refreshToken) {
     return getClaims(refreshToken, refreshKey);
   }
 
   private Claims getClaims(String token, SecretKey key) {
-    return Jwts.parser()
-        .verifyWith(key)
+    return Jwts
+        .parserBuilder()
+        .setSigningKey(key)
         .build()
-        .parseSignedClaims(token)
-        .getPayload();
+        .parseClaimsJws(token)
+        .getBody();
   }
 
-  // перекладываем полученные из токена данные в тип AuthInfo
+  // Map claims to AuthInfo object
   public AuthInfo mapClaimsToAuthInfo(Claims claims) {
     String username = claims.getSubject();
-    // List: [
-    //           LinkedHashMap: [
-    //                              "authority" -> "ROLE_USER"
-    //                           ],
-    //           LinkedHashMap: [
-    //                              "authority" -> "ROLE_ADMIN"
-    //                           ]
-    //        ]
 
+    // Extract roles from claims
     List<LinkedHashMap<String, String>> roleList = (List<LinkedHashMap<String, String>>) claims.get("roles");
     Set<Role> roles = new HashSet<>();
 
+    // Map roles from the token to Role objects
     for (LinkedHashMap<String, String> roleEntry : roleList) {
       String roleTitle = roleEntry.get("authority");
       Role role = roleRepository.findByRole(roleTitle).orElseThrow(
-          () -> new RuntimeException("Database doesn't contain role")
+          () -> new RuntimeException("Database doesn't contain role: " + roleTitle)
       );
       roles.add(role);
     }
+
     return new AuthInfo(username, roles);
   }
-
 }

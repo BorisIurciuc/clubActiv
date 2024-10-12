@@ -2,13 +2,12 @@ package gr36.clubActiv.controller;
 
 
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.services.interfaces.UserService;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,6 @@ public class UserController {
     this.encoder = encoder;
   }
 
-  // 1. Get all users (Admin only)
   @PreAuthorize("hasRole('ADMIN')")
   @GetMapping
   public ResponseEntity<List<User>> getAllUsers() {
@@ -34,59 +32,46 @@ public class UserController {
     return new ResponseEntity<>(users, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @GetMapping("/{id}")
   public ResponseEntity<User> getUserById(@PathVariable Long id) {
-    Optional<User> user = userService.findById(id);
-    if (user.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    return new ResponseEntity<>(user.get(), HttpStatus.OK);
+    return userService.findById(id)
+        .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
-  //update user by ADMIN or user
+  @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @PutMapping("/{id}")
   public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String currentUsername = authentication.getName();
-
-    Optional<User> optionalUser = userService.findById(id);
-    if (optionalUser.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    User userToUpdate = optionalUser.get();
-
-    // Check if the authenticated user is an admin or the owner of the profile
-    boolean isAdmin = authentication.getAuthorities().stream()
-        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-
-    if (!isAdmin && !userToUpdate.getUsername().equals(currentUsername)) {
-      return new ResponseEntity<>(HttpStatus.FORBIDDEN);  // Return 403 if user is neither admin nor the profile owner
-    }
-
-    // Update the user's details
-    userToUpdate.setEmail(updatedUser.getEmail());
-
-    if (updatedUser.getPassword() != null) {
-      userToUpdate.setPassword(encoder.encode(updatedUser.getPassword()));
-    }
-
-    User updated = userService.save(userToUpdate);
-    return new ResponseEntity<>(updated, HttpStatus.OK);
+    return userService.update(id, updatedUser)
+        .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
 
-  // 4. Delete user (Admin only)
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    Optional<User> user = userService.findById(id);
-    if (user.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    Optional<User> optionalUser = userService.findById(id);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+
+      if (userService.isLastAdmin(id)) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 403 Forbidden, если это последний админ
+      }
+
+      userService.delete(id);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content, если удаление прошло успешно
+    } else {
+      throw new UserNotFoundException(id); // Выбрасываем исключение, если пользователь не найден
     }
-    userService.delete(id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
+
+
+
+
+
 }
 
 

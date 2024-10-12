@@ -1,24 +1,36 @@
 package gr36.clubActiv.domain.dto;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import gr36.clubActiv.domain.entity.Activity;
+import gr36.clubActiv.domain.entity.User;
 
+import java.time.LocalDate;
+import java.util.List;
 
 public class ActivityDto {
 
   private Long id;
-
-  private  String title;
-
-  private  String address;
-
+  private String title;
+  private String address;
   private LocalDate startDate;
-
   private String image;
-
   private String description;
+  private Long authorId;
+  private List<Long> userIds;
 
+  // Default constructor
+  public ActivityDto() {}
 
+  public ActivityDto(Activity activity) {
+    this.id = activity.getId();
+    this.title = activity.getTitle();
+    this.address = activity.getAddress();
+    this.startDate = activity.getStartDate();
+    this.image = activity.getImage();
+    this.description = activity.getDescription();
+    this.authorId = activity.getAuthor() != null ? activity.getAuthor().getId() : null;
+    this.userIds = activity.getUsers() != null ?
+        activity.getUsers().stream().map(User::getId).toList() : null;
+  }
 
   public Long getId() {
     return id;
@@ -68,27 +80,33 @@ public class ActivityDto {
     this.description = description;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ActivityDto that)) {
-      return false;
-    }
-    return Objects.equals(getId(), that.getId()) && Objects.equals(getTitle(),
-        that.getTitle());
+  public Long getAuthorId() {
+    return authorId;
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId(), getTitle());
+  public void setAuthorId(Long authorId) {
+    this.authorId = authorId;
+  }
+
+  public List<Long> getUserIds() {
+    return userIds;
+  }
+
+  public void setUserIds(List<Long> userIds) {
+    this.userIds = userIds;
   }
 
   @Override
   public String toString() {
-    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s, "
-            + "description - %s",
-        id, title, address, startDate, image, description);
+    return "ActivityDto{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", address='" + address + '\'' +
+        ", startDate=" + startDate +
+        ", image='" + image + '\'' +
+        ", description='" + description + '\'' +
+        ", authorId=" + authorId +
+        ", userIds=" + userIds +
+        '}';
   }
 }

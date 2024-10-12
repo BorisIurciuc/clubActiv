@@ -1,22 +1,11 @@
 package gr36.clubActiv.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @Table(name = "users")
@@ -27,7 +16,7 @@ public class User implements UserDetails {
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "username",  nullable = false)
+  @Column(name = "username", nullable = false)
   private String username;
 
   @Column(name = "email", unique = true, nullable = false)
@@ -58,6 +47,8 @@ public class User implements UserDetails {
   )
   private Set<Activity> activities;
 
+  // Getters and Setters
+
   public Set<Role> getRoles() {
     return roles;
   }
@@ -77,14 +68,6 @@ public class User implements UserDetails {
   @Override
   public String getUsername() {
     return username;
-  }
-
-  public String getName() {
-    return username;
-  }
-
-  public void setName(String username) {
-    this.username = username;
   }
 
   public void setUsername(String username) {
@@ -126,39 +109,58 @@ public class User implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles;
+    return roles;  // Roles are already implementing GrantedAuthority
   }
+
+
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return active;
+  }
+
+  // equals and hashCode
 
   @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof User user)) {
+    if (!(o instanceof User)) {
       return false;
     }
-    return isActive() == user.isActive() && Objects.equals(getId(), user.getId())
-        && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(
-        getEmail(), user.getEmail()) && Objects.equals(getPassword(), user.getPassword())
-        && Objects.equals(getImage(), user.getImage()) && Objects.equals(
-        getRoles(), user.getRoles());
+    User user = (User) o;
+    return Objects.equals(id, user.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles(),
-        isActive());
+    return Objects.hash(id);
   }
+
+
 
   @Override
   public String toString() {
-    return String.format("User: id - %d, username - %s, roles - %s",
-        id, username, roles == null ? "empty" : roles);
+    return String.format("User: id - %d, username - %s, roles - %s", id, username, roles == null ? "empty" : roles);
   }
 
-//    Метод для получения зашифрованного пароля
-//    для добавления пользователей в БД вручную
-// public static void main(String[] args) {
-//   System.out.println(new BCryptPasswordEncoder().encode("111"));
-// }
+  public Object getName() {
+    return username;
+  }
 }

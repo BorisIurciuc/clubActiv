@@ -18,6 +18,7 @@ public class AuthService {
   private TokenService tokenService;
   private Map<String, String> refreshStorage;
   private BCryptPasswordEncoder encoder;
+  private Map<String, String> refreshTokenStorage = new HashMap<>();
 
   // constructor
 
@@ -56,4 +57,8 @@ public class AuthService {
     throw new AuthException("Refresh token is incorrect");
   }
 
+
+  public void logout(String refreshToken) {
+    refreshTokenStorage.remove(refreshToken);
+  }
 }

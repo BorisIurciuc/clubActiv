@@ -22,7 +22,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="image" type="varchar">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
 
 
