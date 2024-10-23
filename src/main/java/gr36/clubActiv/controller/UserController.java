@@ -62,9 +62,9 @@ public class UserController {
       }
 
       userService.delete(id);
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content, если удаление прошло успешно
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } else {
-      throw new UserNotFoundException(id); // Выбрасываем исключение, если пользователь не найден
+      throw new UserNotFoundException(id);
     }
   }
 

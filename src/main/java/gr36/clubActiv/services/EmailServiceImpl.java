@@ -43,7 +43,7 @@ public class EmailServiceImpl implements EmailService {
       String emailText = generateEmailText(user);
 
       // Set email metadata
-      helper.setFrom("nejelschi@gmail.com");
+      helper.setFrom("boris.iurciuc@gmail.com");
       helper.setTo(user.getEmail());
       helper.setSubject("Registration Confirmation");
       helper.setText(emailText, true); // Set true for HTML content

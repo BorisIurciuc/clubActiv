@@ -4,6 +4,7 @@ import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.User;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 public interface ActivityService {
 
@@ -21,5 +22,12 @@ public interface ActivityService {
 
   List<ActivityDto> getActivitiesByUserId(Long userId);
 
-  ActivityDto removeUserFromActivity(Long activityId, String username);
+  void removeUserFromActivity(Long activityId, String username);
+
+  boolean isUserRegistered(Long activityId, String username);
+
+  List<Long> getUserRegisteredActivities(String username);
+
+  List<ActivityDto> getActivitiesByAuthor(Long authorId);
+
 }

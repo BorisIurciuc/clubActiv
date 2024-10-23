@@ -39,6 +39,7 @@ public class Activity {
   )
   @JsonIgnore
   private List<User> users;
+
   public void addUser(User user) {
     if (!users.contains(user)) {
       users.add(user);

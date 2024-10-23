@@ -5,6 +5,7 @@ import gr36.clubActiv.exeption_handling.Response;
 import gr36.clubActiv.exeption_handling.exeptions.UserAlreadyExistsException;
 import gr36.clubActiv.services.interfaces.UserService;
 import jakarta.validation.Valid;
+import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,14 @@ public class RegistrationController {
   }
 
   @GetMapping
-  public ResponseEntity<Response> registrationConfirm(@RequestParam String code) {
+  public ResponseEntity<?> registrationConfirm(@RequestParam String code) {
     try {
       service.registrationConfirm(code);
-      return ResponseEntity.ok(new Response("Registration confirmed successfully", 200));
+
+      // Redirect to the front-end confirmation page
+      URI redirectUri = URI.create("http://localhost:5173/#/registration-confirmed");
+      return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
+
     } catch (IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(new Response("Confirmation failed: " + e.getMessage(), 400));
@@ -47,4 +52,6 @@ public class RegistrationController {
           .body(new Response("An error occurred: " + e.getMessage(), 500));
     }
   }
+
+
 }

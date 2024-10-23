@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+  <!-- Create the 'news' table -->
+  <changeSet id="create-table-news" author="Denis">
+
+    <createTable tableName="news">
+
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true"/>
+      </column>
+
+      <column name="title" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="description" type="varchar(500)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="created_by" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="created_at" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+
+    </createTable>
+
+    <!-- Add foreign key constraint linking 'created_by' to the 'users' table -->
+    <addForeignKeyConstraint baseTableName="news"
+      baseColumnNames="created_by"
+      constraintName="fk_news_user"
+      referencedTableName="users"
+      referencedColumnNames="id"/>
+
+  </changeSet>
+
+</databaseChangeLog>

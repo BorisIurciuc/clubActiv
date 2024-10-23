@@ -21,7 +21,7 @@
       <column name="date-time" type="datetime">
         <constraints nullable="false"/>
       </column>
-      <column name="image" type="varchar">
+      <column name="image" type="varchar(1024)">
         <constraints nullable="true"/>
       </column>
 

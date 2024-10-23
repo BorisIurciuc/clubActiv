@@ -37,25 +37,40 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .httpBasic(AbstractHttpConfigurer::disable)
-        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // Custom JWT filter
+        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(x -> x
+
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
-
-            // User management: allow ADMIN to update any user and regular users to update themselves
-            .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
-
-            // This line allows ADMIN to update any user, but regular users to update only their own profile
-            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
-
+            .requestMatchers(HttpMethod.GET, "/api/activity/{id}/is-registered").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/user/registered-activities").authenticated()
+            .requestMatchers(HttpMethod.GET, "/api/activity/user/activities/created").authenticated()
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
+
+            // User management: allow ADMIN to update any user and regular users to update themselves
+            .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
+
+            // News management
+            .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/news/{id}").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/news/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/news/{id}").hasRole("ADMIN")
+
+            // Reviews and Responses
+            .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
+//            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/responses/review/{reviewId}").permitAll()
 
             // Authentication and registration routes
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()

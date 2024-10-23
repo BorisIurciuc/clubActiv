@@ -33,7 +33,8 @@ public class DataInitializer implements CommandLineRunner {
       admin.setEmail("testadmin@example.com");
       admin.setPassword(encoder.encode("111"));
       admin.setRoles(Set.of(roleService.getRoleAdmin()));
-      admin.setActive(true);  // Mark admin as active
+      admin.setActive(true);
+
       userService.save(admin);
       System.out.println("Admin user created: TEST_ADMIN");
     } else {
@@ -48,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
       user.setPassword(encoder.encode("111"));
       user.setRoles(Set.of(roleService.getRoleUser()));
       user.setActive(true);
+
       userService.save(user);
       System.out.println("Regular user created: TEST_USER");
     }

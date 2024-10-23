@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     if (existingUser.isPresent()) {
       throw new UserAlreadyExistsException("Email already registered");
     }
-//test
+
     User newUser = new User();
     newUser.setUsername(user.getUsername());
     newUser.setRoles(Set.of(roleService.getRoleUser()));
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
     if (authentication.getPrincipal() instanceof UserDetails) {
       currentUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
     } else if (authentication.getPrincipal() instanceof String) {
-      currentUsername = (String) authentication.getPrincipal();  // It's a username string
+      currentUsername = (String) authentication.getPrincipal();
     }
 
     User authenticatedUser = userRepository.findByUsername(currentUsername)
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void delete(Long id) {
     if (!repository.existsById(id)) {
-      throw new UserNotFoundException(id); // Это исключение будет перехвачено, если пользователь не найден.
+      throw new UserNotFoundException(id);
     }
 
     confirmationCodeRepository.deleteByUserId(id);
