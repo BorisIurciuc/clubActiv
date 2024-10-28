@@ -136,7 +136,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     // Проверка на то, состоит ли пользователь уже в активности
     if (activity.getUsers().contains(user)) {
-      throw new IllegalArgumentException("The user is already registered");
+      throw new IllegalArgumentException("The user is already registered b");
     }
 
     // Если пользователь не автор и не состоит в активности, добавляем его
