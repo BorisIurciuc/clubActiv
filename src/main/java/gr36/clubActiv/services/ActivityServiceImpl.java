@@ -131,12 +131,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     // Проверка на то, является ли пользователь автором активности
     if (activity.getAuthor().getId().equals(user.getId())) {
-      throw new IllegalArgumentException("Автор активности не может добавлять себя в свою же активность.");
+      throw new IllegalArgumentException("The activity author cannot add themselves to their own activity.");
     }
 
     // Проверка на то, состоит ли пользователь уже в активности
     if (activity.getUsers().contains(user)) {
-      throw new IllegalArgumentException("Пользователь уже зарегистрирован в этой активности.");
+      throw new IllegalArgumentException("The user is already registered b");
     }
 
     // Если пользователь не автор и не состоит в активности, добавляем его
