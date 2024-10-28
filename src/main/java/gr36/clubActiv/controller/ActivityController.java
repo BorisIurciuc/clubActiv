@@ -209,6 +209,16 @@ public class ActivityController {
     return ResponseEntity.ok(authoredActivities);
   }
 
+  @GetMapping("/{id}/author")
+  public ResponseEntity<?> getActivityAuthorUsername(@PathVariable Long id) {
+    try {
+      String username = service.getActivityAuthorUsername(id);
+      return ResponseEntity.ok(username);
+    } catch (ActivityNotFoundException e) {
+      // Позволим GlobalExceptionHandler обработать исключение
+      throw e;
+    }
+  }
 
 }
 
