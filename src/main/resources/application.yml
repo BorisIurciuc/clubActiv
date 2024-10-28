@@ -2,9 +2,9 @@ spring:
   application:
     name: clubActiv
   datasource:
-    url: jdbc:postgresql://localhost:5432/activeDB
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: qwerty007
+    password: denis
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:db/changelog/changelog-master.xml

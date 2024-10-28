@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
   // fields
   private UserServiceImpl userService;
   private TokenService tokenService;
@@ -20,30 +21,30 @@ public class AuthService {
   private BCryptPasswordEncoder encoder;
   private Map<String, String> refreshTokenStorage = new HashMap<>();
 
-  // constructor
 
-  public AuthService(UserServiceImpl userService, TokenService tokenService,  BCryptPasswordEncoder encoder) {
+
+  public AuthService(UserServiceImpl userService, TokenService tokenService,
+      BCryptPasswordEncoder encoder) {
     this.userService = userService;
     this.tokenService = tokenService;
     this.refreshStorage = new HashMap<>();
     this.encoder = encoder;
   }
 
-  // авторизация inboundUser - входящего пользователя
+
   public TokenResponseDto login(User inboundUser) throws AuthException {
     String username = inboundUser.getUsername();
     UserDetails foundUser = userService.loadUserByUsername(username);
 
-    if (encoder.matches(inboundUser.getPassword(), foundUser.getPassword())) { // сравниваем пароль пользователя и пароль из БД от найденного пользователя
+    if (encoder.matches(inboundUser.getPassword(), foundUser.getPassword())) {
       String accessToken = tokenService.generateAccessToken(foundUser);
       String refreshToken = tokenService.generateRefreshToken(foundUser);
       refreshStorage.put(username, refreshToken);
-      return new TokenResponseDto(accessToken, refreshToken); // вернули пользователю токены
+      return new TokenResponseDto(accessToken, refreshToken);
     }
     throw new AuthException("Password is incorrect");
   }
 
-  // проверка и выдача нового refreshToken
   public TokenResponseDto getNewAccessToken(String inboundRefreshToken) throws AuthException {
     Claims refreshClaims = tokenService.getRefreshClaims(inboundRefreshToken);
     String username = refreshClaims.getSubject();
@@ -56,7 +57,6 @@ public class AuthService {
     }
     throw new AuthException("Refresh token is incorrect");
   }
-
 
   public void logout(String refreshToken) {
     refreshTokenStorage.remove(refreshToken);

@@ -3,10 +3,12 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.entity.Response;
 import gr36.clubActiv.domain.entity.Review;
 
+import gr36.clubActiv.exeption_handling.exeptions.ResponseNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.ReviewNotFounException;
 import gr36.clubActiv.repository.ResponseRepository;
 import gr36.clubActiv.repository.ReviewRepository;
 import gr36.clubActiv.services.interfaces.ResponseService;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,8 +40,12 @@ public class ResponseServiceImpl implements ResponseService {
 
   @Override
   public List<Response> getResponsesByReviewId(Long reviewId) {
+    if (!reviewRepository.existsById(reviewId)) {
+      throw new ReviewNotFounException(reviewId );
+    }
     return responseRepository.findByReviewId(reviewId);
   }
+
 
   @Override
   public Response findResponseById(Long responseId) {
