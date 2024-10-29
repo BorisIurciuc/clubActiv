@@ -1,9 +1,11 @@
 package gr36.clubActiv.services;
 
+import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.Role;
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.exeption_handling.exeptions.UserAlreadyExistsException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
+import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.ConfirmationCodeRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ConfirmationService;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+  private final ActivityRepository activityRepository;
   private final UserRepository repository;
   private final RoleService roleService;
   private final EmailService emailService;
@@ -39,11 +42,12 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
 
 
-  public UserServiceImpl(UserRepository repository, RoleService roleService,
+  public UserServiceImpl(ActivityRepository activityRepository, UserRepository repository, RoleService roleService,
       EmailService emailService, BCryptPasswordEncoder encoder,
       ConfirmationService confirmationService,
       ConfirmationCodeRepository confirmationCodeRepository, UserRepository userRepository,
       PasswordEncoder passwordEncoder) {
+    this.activityRepository = activityRepository;
     this.repository = repository;
     this.roleService = roleService;
     this.emailService = emailService;
@@ -159,7 +163,8 @@ public class UserServiceImpl implements UserService {
     if (!repository.existsById(id)) {
       throw new UserNotFoundException(id);
     }
-
+    List<Activity> userActivities = activityRepository.findByAuthorId(id);
+    activityRepository.deleteAll(userActivities);
     confirmationCodeRepository.deleteByUserId(id);
     repository.deleteById(id);
   }
@@ -203,6 +208,7 @@ public class UserServiceImpl implements UserService {
   public Optional<User> findByEmail(String email) {
     return userRepository.findByEmail(email);
   }
+
   @Override
   public void updatePassword(User user, String newPassword) {
     user.setPassword(passwordEncoder.encode(newPassword));

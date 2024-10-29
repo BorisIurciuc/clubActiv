@@ -18,8 +18,7 @@ import gr36.clubActiv.domain.entity.Activity;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "http://localhost:5173")
-//comment to test
+
 @RestController
 @RequestMapping("/api/activity")
 public class ActivityController {
@@ -106,7 +105,8 @@ public class ActivityController {
   }
 
   @PutMapping("/{activity_id}/add-user")
-  public ResponseEntity<?> addUserToActivity(@PathVariable Long activity_id, Authentication authentication) {
+  public ResponseEntity<?> addUserToActivity(@PathVariable Long activity_id,
+      Authentication authentication) {
     String username = authentication.getName();
     try {
       ActivityDto updatedActivity = service.addUserToActivity(activity_id, username);
@@ -115,7 +115,6 @@ public class ActivityController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
   }
-
 
 
   @GetMapping("/my-activities")
