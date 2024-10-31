@@ -6,8 +6,12 @@ public class Images {
 
   private final String[] imageLinks = {
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/1.webp",
-      "https://my-activity-images.s3.eu-north-1.amazonaws.com/2.webp",
-      "https://my-activity-images.s3.eu-north-1.amazonaws.com/3.webp",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-ok-1.jpg",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-ok-2.jpg",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-ok-3.webp",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-ok-4.jpg",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-course-5.jpg",
+      "https://my-activity-images.s3.eu-north-1.amazonaws.com/image-course-6.png",
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/4.webp",
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/5.webp",
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/6.webp",
@@ -15,6 +19,7 @@ public class Images {
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/8.webp",
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/9.webp",
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/10.webp"
+
   };
 
 
