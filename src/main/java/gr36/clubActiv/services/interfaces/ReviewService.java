@@ -20,4 +20,8 @@ public interface ReviewService {
 
 
   void update(Long id, Review updatedReview);
+
+
+
+  void deleteReviewsByUser(String username);
 }
