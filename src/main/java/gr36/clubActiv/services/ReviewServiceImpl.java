@@ -40,9 +40,24 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public void update(Long id) {
-    Review review = reviewRepository.findById(id)
+  public void update(Long id, Review updatedReview) {
+    Review existingReview = reviewRepository.findById(id)
         .orElseThrow(() -> new ReviewNotFounException(id));
-    reviewRepository.saveAndFlush(reviewRepository.findById(id).get());
+
+
+    existingReview.setTitle(updatedReview.getTitle());
+    existingReview.setDescription(updatedReview.getDescription());
+    existingReview.setRating(updatedReview.getRating());
+
+
+    if (updatedReview.getCreatedBy() == null) {
+      existingReview.setCreatedBy(existingReview.getCreatedBy());
+    } else {
+      existingReview.setCreatedBy(updatedReview.getCreatedBy());
+    }
+
+    reviewRepository.save(existingReview);
   }
+
+
 }

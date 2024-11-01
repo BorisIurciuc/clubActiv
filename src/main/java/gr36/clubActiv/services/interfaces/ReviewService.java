@@ -17,5 +17,7 @@ public interface ReviewService {
 
   Optional<Review> findById(Long id);
 
-  void update(Long id);
+
+
+  void update(Long id, Review updatedReview);
 }

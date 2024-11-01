@@ -69,6 +69,7 @@ public class SecurityConfig {
 
             // Reviews and Responses
             .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT,"api/reviews/{id}").authenticated()
             .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}").hasAnyRole("ADMIN", "USER")
