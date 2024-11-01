@@ -47,7 +47,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     existingReview.setTitle(updatedReview.getTitle());
     existingReview.setDescription(updatedReview.getDescription());
-    existingReview.setRating(updatedReview.getRating());
+    //existingReview.setRating(updatedReview.getRating());
 
 
     if (updatedReview.getCreatedBy() == null) {
