@@ -10,6 +10,7 @@ import gr36.clubActiv.repository.ConfirmationCodeRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ConfirmationService;
 import gr36.clubActiv.services.interfaces.EmailService;
+import gr36.clubActiv.services.interfaces.ReviewService;
 import gr36.clubActiv.services.interfaces.RoleService;
 import gr36.clubActiv.services.interfaces.UserService;
 import java.util.List;
@@ -40,13 +41,14 @@ public class UserServiceImpl implements UserService {
   private final ConfirmationCodeRepository confirmationCodeRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ReviewService reviewService;
 
 
   public UserServiceImpl(ActivityRepository activityRepository, UserRepository repository, RoleService roleService,
       EmailService emailService, BCryptPasswordEncoder encoder,
       ConfirmationService confirmationService,
       ConfirmationCodeRepository confirmationCodeRepository, UserRepository userRepository,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder, ReviewService reviewService) {
     this.activityRepository = activityRepository;
     this.repository = repository;
     this.roleService = roleService;
@@ -56,6 +58,7 @@ public class UserServiceImpl implements UserService {
     this.confirmationCodeRepository = confirmationCodeRepository;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
+    this.reviewService = reviewService;
   }
 
   @Override
@@ -160,11 +163,14 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void delete(Long id) {
+    Optional<User> userToDelete = repository.findById(id);
     if (!repository.existsById(id)) {
       throw new UserNotFoundException(id);
     }
+
     List<Activity> userActivities = activityRepository.findByAuthorId(id);
     activityRepository.deleteAll(userActivities);
+    reviewService.deleteReviewsByUser(userToDelete.get().getUsername());
     confirmationCodeRepository.deleteByUserId(id);
     repository.deleteById(id);
   }
