@@ -2,6 +2,7 @@ package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.entity.Response;
 import gr36.clubActiv.services.interfaces.ResponseService;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,4 +37,17 @@ public class ResponseController {
     List<Response> responses = responseService.getResponsesByReviewId(reviewId);
     return ResponseEntity.ok(responses);
   }
+
+  @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deleteResponse(@PathVariable Long id) {
+    Response responseToBeDeleted = responseService.findResponseById(id);
+    if (responseToBeDeleted == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Response not found");
+    }
+    responseService.deleteResponse(id);
+    return ResponseEntity.noContent().build();
+  }
+
+
 }

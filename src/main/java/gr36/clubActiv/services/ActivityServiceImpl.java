@@ -12,6 +12,8 @@ import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,13 +28,15 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityMappingService mappingService;
   private final UserRepository userRepository;
   private static final Logger log = LoggerFactory.getLogger(ActivityServiceImpl.class);
+  private final ActivityRepository activityRepository;
 
 
   public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService,
-      UserRepository userRepository) {
+      UserRepository userRepository, ActivityRepository activityRepository) {
     this.repository = repository;
     this.mappingService = mappingService;
     this.userRepository = userRepository;
+    this.activityRepository = activityRepository;
   }
 
   private String getRandomImage() {
@@ -43,13 +47,18 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityDto create(ActivityDto activityDto, User author) {
+    Optional<Activity> activityToCheck = activityRepository.findByTitle(activityDto.getTitle());
+    if (activityToCheck.isPresent()) {
+      throw new ActivityCreationException(
+          "This activity - " + activityDto.getTitle() + ", already exists");
+    }
 
     try {
       Activity activity = new Activity();
       activity.setTitle(activityDto.getTitle());
       activity.setDescription(activityDto.getDescription());
       activity.setStartDate(activityDto.getStartDate());
-      if (activityDto.getImage() != null) {
+      if (activityDto.getImage() != null && !activityDto.getImage().isEmpty()) {
         activity.setImage(activityDto.getImage());
         log.info("Image provided: " + activityDto.getImage());
       } else {
@@ -62,6 +71,7 @@ public class ActivityServiceImpl implements ActivityService {
 
       repository.save(activity);
       return new ActivityDto(activity);
+
     } catch (Exception e) {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
@@ -121,13 +131,19 @@ public class ActivityServiceImpl implements ActivityService {
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException(username));
-
-    if (!activity.getUsers().contains(user)) {
-      activity.addUser(user);
-      repository.save(activity);
+    if (activity.getAuthor().getId().equals(user.getId())) {
+      throw new IllegalArgumentException(
+          "The activity author cannot add themselves to their own activity.");
     }
+    if (activity.getUsers().contains(user)) {
+      throw new IllegalArgumentException("The user is already registered b");
+    }
+    activity.addUser(user);
+    repository.save(activity);
+
     return mappingService.mapEntityToDto(activity);
   }
+
 
   @Override
   public List<ActivityDto> getActivitiesByUserId(Long userId) {
@@ -137,18 +153,59 @@ public class ActivityServiceImpl implements ActivityService {
         .toList();
   }
 
-  @Override
+
   @Transactional
-  public ActivityDto removeUserFromActivity(Long activityId, String username) {
+  public void removeUserFromActivity(Long activityId, String username) {
+    Activity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException(username));
+
+    if (!activity.getUsers().contains(user)) {
+      throw new IllegalArgumentException("User is not registered for this activity.");
+    }
+
+    activity.getUsers().remove(user);
+    activityRepository.save(activity);
+  }
+
+  public boolean isUserRegistered(Long activityId, String username) {
     Activity activity = repository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException(username));
 
-    if (activity.getUsers().contains(user)) {
-      activity.getUsers().remove(user);
-      repository.save(activity);
-    }
-    return mappingService.mapEntityToDto(activity);
+    return activity.getUsers().contains(user);
   }
+
+  @Override
+  public List<Long> getUserRegisteredActivities(String username) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+    return user.getActivities().stream()
+        .map(Activity::getId)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<ActivityDto> getActivitiesByAuthor(Long authorId) {
+    List<Activity> activities = activityRepository.findByAuthorId(authorId);
+    return activities.stream()
+        .map(mappingService::mapEntityToDto)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public String getActivityAuthorUsername(Long activityId) {
+    Activity activity = repository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    if (activity.getAuthor() == null) {
+      throw new IllegalStateException("Activity " + activityId + " has no author");
+    }
+
+    return activity.getAuthor().getUsername();
+  }
+
 }

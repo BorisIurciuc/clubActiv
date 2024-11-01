@@ -6,4 +6,5 @@ public interface EmailService {
 
   void sendConfirmationEmail(User user);
 
+  void sendPasswordResetEmail(String email, String resetUrl);
 }

@@ -48,7 +48,6 @@ public class UserController {
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
-
   @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {

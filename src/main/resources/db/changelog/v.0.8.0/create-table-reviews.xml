@@ -16,10 +16,10 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="title" type="VARCHAR(50)">
-        <constraints nullable="false" unique="true"/>
+        <constraints nullable="false" />
       </column>
       <column name="description" type="VARCHAR(400)">
-        <constraints nullable="false" unique="true"/>
+        <constraints nullable="false" />
       </column>
       <column name="rating" type="INTEGER">
         <constraints nullable="false"/>

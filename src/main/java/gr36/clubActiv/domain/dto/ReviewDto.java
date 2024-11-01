@@ -12,11 +12,11 @@ public class ReviewDto {
   private String createdBy;
   private LocalDateTime createdAt;
 
-  // Default constructor
+
   public ReviewDto() {
   }
 
-  // Constructor with all fields
+
   public ReviewDto(Long id, String title, String description, int rating, String createdBy, LocalDateTime createdAt) {
     this.id = id;
     this.title = title;
@@ -36,7 +36,7 @@ public class ReviewDto {
     this.createdAt = review.getCreatedAt();
   }
 
-  // Getters and setters
+
   public Long getId() {
     return id;
   }

@@ -11,4 +11,5 @@ public interface ResponseService {
   void deleteResponse(Long responseId);
 
   List<Response> getResponsesByReviewId(Long reviewId);
+  Response findResponseById(Long responseId);
 }

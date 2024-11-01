@@ -22,13 +22,13 @@ public class EmailServiceImpl implements EmailService {
   private final Configuration mailConfig;
   private final ConfirmationService confirmationService;
 
-  // Constructor injection
-  public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig, ConfirmationService confirmationService) {
+
+  public EmailServiceImpl(JavaMailSender sender, Configuration mailConfig,
+      ConfirmationService confirmationService) {
     this.sender = sender;
     this.mailConfig = mailConfig;
     this.confirmationService = confirmationService;
 
-    // Set mail configuration
     mailConfig.setDefaultEncoding("UTF-8");
     mailConfig.setTemplateLoader(new ClassTemplateLoader(EmailServiceImpl.class, "/mail"));
   }
@@ -37,38 +37,59 @@ public class EmailServiceImpl implements EmailService {
   public void sendConfirmationEmail(User user) {
     MimeMessage message = sender.createMimeMessage(); // Create MimeMessage object
     try {
-      MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+      MimeMessageHelper helper = new MimeMessageHelper(message,
+          MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
 
-      // Generate the email content using the FreeMarker template
       String emailText = generateEmailText(user);
 
-      // Set email metadata
       helper.setFrom("boris.iurciuc@gmail.com");
       helper.setTo(user.getEmail());
       helper.setSubject("Registration Confirmation");
-      helper.setText(emailText, true); // Set true for HTML content
+      helper.setText(emailText, true);
 
-      // Send email
       sender.send(message);
     } catch (MessagingException e) {
       throw new RuntimeException("Error while sending confirmation email", e);
     }
   }
 
+  @Override
+  public void sendPasswordResetEmail(String email, String resetUrl) {
+    MimeMessage message = sender.createMimeMessage();
+    try {
+      MimeMessageHelper helper = new MimeMessageHelper(message,
+          MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+      String emailText = generatePasswordResetEmailText(resetUrl);
+      helper.setFrom("boris.iurciuc@gmail.com");
+      helper.setTo(email);
+      helper.setSubject("Password Reset Request");
+      helper.setText(emailText, true);
+
+      sender.send(message);
+    } catch (MessagingException e) {
+      throw new RuntimeException("Error while sending password reset email", e);
+    }
+  }
+
+  private String generatePasswordResetEmailText(String resetUrl) {
+    try {
+      Template template = mailConfig.getTemplate("password_reset_mail.ftlh");
+      Map<String, Object> templateData = new HashMap<>();
+      templateData.put("link", resetUrl);
+      return FreeMarkerTemplateUtils.processTemplateIntoString(template, templateData);
+    } catch (Exception e) {
+      throw new RuntimeException("Error while generating password reset email text", e);
+    }
+  }
+
   private String generateEmailText(User user) {
     try {
       Template template = mailConfig.getTemplate("confirm_reg_mail.ftlh");
-
-      // Generate confirmation code and URL
       String code = confirmationService.generateConfirmationCode(user);
       String url = "http://localhost:8080/api/register?code=" + code;
-
-      // Prepare template data
       Map<String, Object> templateData = new HashMap<>();
       templateData.put("name", user.getName());
       templateData.put("link", url);
-
-      // Process template into a String
       return FreeMarkerTemplateUtils.processTemplateIntoString(template, templateData);
     } catch (Exception e) {
       throw new RuntimeException("Error while generating email text", e);

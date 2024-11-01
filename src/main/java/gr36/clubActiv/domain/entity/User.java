@@ -1,5 +1,6 @@
 package gr36.clubActiv.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -45,9 +46,12 @@ public class User implements UserDetails {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "activity_id")
   )
+  @JsonIgnoreProperties("author")
   private Set<Activity> activities;
 
-  // Getters and Setters
+  public Set<Activity> getActivities() {
+    return activities;
+  }
 
   public Set<Role> getRoles() {
     return roles;
@@ -109,7 +113,7 @@ public class User implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles;  // Roles are already implementing GrantedAuthority
+    return roles;
   }
 
 
