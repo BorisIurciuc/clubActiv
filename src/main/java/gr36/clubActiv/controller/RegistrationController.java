@@ -40,7 +40,6 @@ public class RegistrationController {
     try {
       service.registrationConfirm(code);
 
-      // Redirect to the front-end confirmation page
       URI redirectUri = URI.create("http://localhost:5173/#/registration-confirmed");
       return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
 

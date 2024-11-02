@@ -62,7 +62,7 @@ public class AuthController {
 
   @GetMapping("/me")
   public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-    String username = authentication.getName();  // Get username from token
+    String username = authentication.getName();
 
     try {
       User currentUser = userService.findByUsername(username)
