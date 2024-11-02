@@ -214,7 +214,7 @@ public class ActivityController {
       String username = service.getActivityAuthorUsername(id);
       return ResponseEntity.ok(username);
     } catch (ActivityNotFoundException e) {
-      // Позволим GlobalExceptionHandler обработать исключение
+
       throw e;
     }
   }
