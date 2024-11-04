@@ -1,6 +1,7 @@
 package gr36.clubActiv.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -40,6 +41,10 @@ public class Activity {
   )
   @JsonIgnore
   private List<User> users = new ArrayList<>();//to avoid null pointer
+
+  @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference
+  private List<Review> reviews = new ArrayList<>();
 
   public void addUser(User user) {
     if (!users.contains(user)) {
