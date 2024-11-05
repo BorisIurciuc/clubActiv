@@ -1,6 +1,7 @@
 package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
+import gr36.clubActiv.domain.entity.Review;
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
@@ -218,6 +219,16 @@ public class ActivityController {
       throw e;
     }
   }
+
+  @GetMapping("/{activityId}/reviews")
+  public ResponseEntity<List<Review>> getReviewsByActivityId(@PathVariable Long activityId) {
+    log.info("Fetching reviews for activity ID: {}", activityId);
+    List<Review> reviews = service.getReviewsByActivityId(activityId);
+    return ResponseEntity.ok(reviews);
+  }
+
+
+
 
 }
 

@@ -53,6 +53,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}/author").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/activity/{activityId}/reviews").permitAll()
 
 
             .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")

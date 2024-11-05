@@ -123,6 +123,14 @@ public class Activity {
     this.author = author;
   }
 
+  public List<Review> getReviews() {
+    return reviews;
+  }
+
+  public void setReviews(List<Review> reviews) {
+    this.reviews = reviews;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

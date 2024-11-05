@@ -1,6 +1,7 @@
 package gr36.clubActiv.services.interfaces;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
+import gr36.clubActiv.domain.entity.Review;
 import gr36.clubActiv.domain.entity.User;
 
 import java.util.List;
@@ -31,5 +32,7 @@ public interface ActivityService {
   List<ActivityDto> getActivitiesByAuthor(Long authorId);
 
   String getActivityAuthorUsername(Long activityId);
+
+  List<Review> getReviewsByActivityId(Long activityId);
 
 }

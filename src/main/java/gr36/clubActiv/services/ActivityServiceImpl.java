@@ -3,6 +3,7 @@ package gr36.clubActiv.services;
 import gr36.Images;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
+import gr36.clubActiv.domain.entity.Review;
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
@@ -207,5 +208,14 @@ public class ActivityServiceImpl implements ActivityService {
 
     return activity.getAuthor().getUsername();
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Review> getReviewsByActivityId(Long activityId) {
+    Activity activity = repository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+    return activity.getReviews();
+  }
+
 
 }
