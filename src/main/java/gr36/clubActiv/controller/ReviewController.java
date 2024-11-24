@@ -55,7 +55,7 @@ public class ReviewController {
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Review review = reviewService.findById(id)
-        .orElseThrow(() -> new ReviewNotFounException("Review not found"));
+        .orElseThrow(() -> new ReviewNotFounException(id));
 
     boolean isAuthor = review.getCreatedBy().equals(username);
     boolean isAdmin = authentication.getAuthorities().stream()
@@ -78,23 +78,26 @@ public class ReviewController {
     return ResponseEntity.ok(reviews);
   }
 
-  @PreAuthorize("hasRole('USER')")
+
   @PutMapping("/{id}")
-  public ResponseEntity<String> updateReview(@PathVariable Long id, Authentication authentication) {
+  public ResponseEntity<String> updateReview(@PathVariable Long id,
+      @RequestBody Review updatedReview, Authentication authentication) {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    Review review = reviewService.findById(id)
-        .orElseThrow(() -> new ReviewNotFounException("Review not found"));
-    boolean isAuthor = review.getCreatedBy().equals(username);
+    Review existingReview = reviewService.findById(id)
+        .orElseThrow(() -> new ReviewNotFounException(id));
+
+    boolean isAuthor = existingReview.getCreatedBy().equals(username);
 
     if (!isAuthor) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body("You are not authorized to update this review.");
     }
 
-    reviewService.update(id);
+    updatedReview.setCreatedBy(existingReview.getCreatedBy());
+    reviewService.update(id, updatedReview);
     return ResponseEntity.ok("Review updated successfully");
   }
 

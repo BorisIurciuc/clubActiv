@@ -40,6 +40,7 @@ public class SecurityConfig {
         .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(x -> x
 
+
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
@@ -51,33 +52,40 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/{id}/author").permitAll()
 
-            // User management: allow ADMIN to update any user and regular users to update themselves
+
             .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
 
-            // News management
+
             .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT, "/api/news/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/news/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/news/{id}").hasRole("ADMIN")
 
-            // Reviews and Responses
             .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT,"api/reviews/{id}").authenticated()
             .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
-//            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/reviews/{id}").authenticated()
+
             .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/responses/review/{reviewId}").permitAll()
+            .requestMatchers(HttpMethod.DELETE, "/api/responses/{id}").hasAnyRole("ADMIN", "USER")
 
-            // Authentication and registration routes
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
             .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
+
+
+            .requestMatchers(HttpMethod.POST, "/api/forgot-password").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/validate-reset-token**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/reset-password**").permitAll()
 
         ).build();
   }

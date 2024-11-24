@@ -33,4 +33,9 @@ public interface UserService extends UserDetailsService {
   int countAdmins();
 
   Optional<User> findByUsername(String username);
+
+  Optional<User> findByEmail(String email);
+
+
+  void updatePassword(User user, String newPassword);
 }

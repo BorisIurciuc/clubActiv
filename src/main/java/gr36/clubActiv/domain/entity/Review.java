@@ -33,7 +33,7 @@ public class Review {
   @Column(name = "rating", nullable = false)
   private int rating;
 
-  // Change this to explicitly reference the correct column name in the DB
+
   @Column(name = "created_by", nullable = false)
   private String createdBy;
 

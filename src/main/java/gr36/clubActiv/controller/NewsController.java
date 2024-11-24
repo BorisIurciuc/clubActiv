@@ -54,24 +54,22 @@ public class NewsController {
     newsService.delete(id);
     return ResponseEntity.noContent().build();
   }
-
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @GetMapping
   public ResponseEntity<List<NewsDto>> getAllNews() {
-    List<News> newsList = newsService.findAll();
-    List<NewsDto> newsDtoList = newsList.stream()
-            .map(news -> new NewsDto(news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername()))
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(newsDtoList);
+    List<NewsDto> newsList = newsService.findAll().stream()
+        .map(news -> new NewsDto(news.getId(), news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername()))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(newsList);
   }
-
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @GetMapping("/{id}")
   public ResponseEntity<NewsDto> getNewsById(@PathVariable Long id) {
     News news = newsService.findById(id)
-            .orElseThrow(() -> new RuntimeException("News not found"));
-    NewsDto newsDto = new NewsDto(news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername());
+        .orElseThrow(() -> new RuntimeException("News not found"));
+    NewsDto newsDto = new NewsDto(news.getId(), news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername());
     return ResponseEntity.ok(newsDto);
   }
+
 
 }

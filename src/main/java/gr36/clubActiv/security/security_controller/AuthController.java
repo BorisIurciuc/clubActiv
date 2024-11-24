@@ -33,7 +33,7 @@ public class AuthController {
     this.userService = userService;
   }
 
-  // Endpoint for user login
+
   @PostMapping("/login")
 
   public ResponseEntity<TokenResponseDto> login(@RequestBody User user) {
@@ -48,9 +48,9 @@ public class AuthController {
     }
   }
 
-  // Endpoint for refreshing the access token
   @PostMapping("/refresh")
-  public ResponseEntity<TokenResponseDto> getNewAccessToken(@RequestBody RefreshRequestDto request) {
+  public ResponseEntity<TokenResponseDto> getNewAccessToken(
+      @RequestBody RefreshRequestDto request) {
     try {
       TokenResponseDto tokenResponse = authService.getNewAccessToken(request.getRefreshToken());
       return ResponseEntity.ok(tokenResponse);
@@ -59,21 +59,21 @@ public class AuthController {
     }
   }
 
-  // Endpoint to get current authenticated user information
+
   @GetMapping("/me")
   public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-    String username = authentication.getName();  // Get username from token
+    String username = authentication.getName();
 
     try {
       User currentUser = userService.findByUsername(username)
-          .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+          .orElseThrow(
+              () -> new UserNotFoundException("User with username " + username + " not found"));
       return ResponseEntity.ok(new UserResponseDto(currentUser));
     } catch (UserNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
   }
 
-  // Endpoint for user logout
   @DeleteMapping("/logout")
   public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
     String refreshToken = token.substring(7);

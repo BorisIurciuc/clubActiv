@@ -76,18 +76,21 @@ public class ActivityServiceImpl implements ActivityService {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
   }
+
   @Override
   public List<ActivityDto> getAllActivities() {
     return repository.findAll().stream()
         .map(mappingService::mapEntityToDto)
         .toList();
   }
+
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
         .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
+
   @Override
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {
@@ -128,13 +131,19 @@ public class ActivityServiceImpl implements ActivityService {
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException(username));
-
-    if (!activity.getUsers().contains(user)) {
-      activity.addUser(user);
-      repository.save(activity);
+    if (activity.getAuthor().getId().equals(user.getId())) {
+      throw new IllegalArgumentException(
+          "The activity author cannot add themselves to their own activity.");
     }
+    if (activity.getUsers().contains(user)) {
+      throw new IllegalArgumentException("The user is already registered b");
+    }
+    activity.addUser(user);
+    repository.save(activity);
+
     return mappingService.mapEntityToDto(activity);
   }
+
 
   @Override
   public List<ActivityDto> getActivitiesByUserId(Long userId) {
@@ -168,6 +177,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     return activity.getUsers().contains(user);
   }
+
   @Override
   public List<Long> getUserRegisteredActivities(String username) {
     User user = userRepository.findByUsername(username)
@@ -186,5 +196,16 @@ public class ActivityServiceImpl implements ActivityService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public String getActivityAuthorUsername(Long activityId) {
+    Activity activity = repository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+
+    if (activity.getAuthor() == null) {
+      throw new IllegalStateException("Activity " + activityId + " has no author");
+    }
+
+    return activity.getAuthor().getUsername();
+  }
 
 }

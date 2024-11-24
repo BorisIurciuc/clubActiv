@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,7 +39,7 @@ public class Activity {
       inverseJoinColumns = @JoinColumn(name = "user_id")
   )
   @JsonIgnore
-  private List<User> users;
+  private List<User> users = new ArrayList<>();//to avoid null pointer
 
   public void addUser(User user) {
     if (!users.contains(user)) {
@@ -51,7 +52,7 @@ public class Activity {
   @JoinColumn(name = "author_id")
   private User author;
 
-  // Getters and Setters
+
   public Long getId() {
     return id;
   }
